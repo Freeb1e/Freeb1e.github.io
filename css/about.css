@@ -1,0 +1,15 @@
+.about-container {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  margin: 20px;
+}
+.about-container h1 {
+  color: #333;
+}
+.about-container a {
+  color: #007acc;
+  text-decoration: none;
+}
+.about-container a:hover {
+  text-decoration: underline;
+}
