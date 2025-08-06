@@ -1,0 +1,1167 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>ZYNQ笔记1：ZYNQ GPIO的设置与初始化 - Hexo</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/images/head/head.png" type="image/png" />
+<meta name="description" content="ZYNQ笔记1：ZYNQ GPIO的设置与初始化 1. GPIO寄存器与API对照表   功能 通道 Xil_底层操作 XGpio_高级API    数据寄存器 通道1 Xil_Out32(BASE + 0x0, data) XGpio_DiscreteWrite(&amp;inst, 1, data)    通道2 Xil_Out32(BASE + 0x8, data) XGpio_Discre">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ZYNQ笔记1：ZYNQ GPIO的设置与初始化">
+<meta property="og:url" content="https://freeb1e.github.io/2025/07/17/ZYNQ1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="ZYNQ笔记1：ZYNQ GPIO的设置与初始化 1. GPIO寄存器与API对照表   功能 通道 Xil_底层操作 XGpio_高级API    数据寄存器 通道1 Xil_Out32(BASE + 0x0, data) XGpio_DiscreteWrite(&amp;inst, 1, data)    通道2 Xil_Out32(BASE + 0x8, data) XGpio_Discre">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-07-17T05:10:34.000Z">
+<meta property="article:modified_time" content="2025-08-06T09:08:35.007Z">
+<meta property="article:author" content="Freeb1e">
+<meta property="article:tag" content="ZYNQ">
+<meta name="twitter:card" content="summary">
+
+<link rel="stylesheet" href="/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1754471914153">
+
+    <link rel="stylesheet" href="//at.alicdn.com/t/c/font_4973540_zvbcq95ih5n.css">
+
+<link rel="stylesheet" href="/css/style.css?v=1754471914153">
+
+
+
+
+    
+        <link rel="stylesheet" href="/custom.css?v=1754471914153">
+    
+        <link rel="stylesheet" href="/themes/umaru/index.css?v=1754471914153">
+    
+        <link rel="stylesheet" href="/themes/asuka/index.css?v=1754471914153">
+    
+
+
+
+<script src="/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/lib/lax.min.js" async></script>
+
+
+<script async src="/js/app.js?v=1754471914153"></script>
+
+ 
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1Z7TFL96ZH"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1Z7TFL96ZH');
+</script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<meta name="generator" content="Hexo 7.3.0"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(/images/background/cqbackground.jpg)"></div><div class="nexmoe-character"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/" title="Freeb1e"><img src="/images/head/liuhua.png" alt="Freeb1e"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/" title="Freeb1e">
+            <img src="/images/head/liuhua.png" alt="Freeb1e" alt="Freeb1e">
+        </a>
+    </div>
+
+  
+  <p class="avatar-id"> Freeb1e</p>
+
+    <div class="nexmoe-count">
+        <div class="nexmoe-count-item"><span>文章</span>4 <div class="item-radius"></div><div class="item-radius item-right"></div> </div>
+        <div class="nexmoe-count-item"><span>标签</span>3<div class="item-radius"></div><div class="item-radius item-right"></div></div>
+        <div class="nexmoe-count-item"><span>分类</span>2<div class="item-radius"></div><div class="item-radius item-right"></div></div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/" title="回到首页">
+            <i class="mdui-list-item-icon nexmoefont icon-zhuye"></i>
+            <div class="mdui-list-item-content">
+                回到首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/archives.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-shejiwenzhang"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/about.html" title="关于Freeb1e">
+            <i class="mdui-list-item-icon nexmoefont icon-guanyuwo"></i>
+            <div class="mdui-list-item-content">
+                关于Freeb1e
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="mailto:gaoxiao43@163.com"
+			target="_blank"
+			mdui-tooltip="{content: 'mail'}"
+			style="
+				color: rgb(249,8,8);
+				background-color: rgba(249,8,8,.1);
+			"
+		>
+			<i
+				class="nexmoefont icon-mail-fill"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/freeb1e/"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .15);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/1355533530"
+			target="_blank"
+			mdui-tooltip="{content: 'bilibili'}"
+			style="
+				color: rgb(71, 159, 209);
+				background-color: rgba(71, 159, 209, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/电赛/">电赛</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/网页前端/">网页前端</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+         
+            <form id="search_form" action_e="https://cn.bing.com/search?q=site:freeb1e.github.io" onsubmit="return search();">
+                <label><input id="search_value" name="q" type="search" placeholder="搜索"></label>
+            </form>
+         
+    </div>
+</div>
+
+
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
+      <a href="/tags/ZYNQ/" style="font-size: 10px;">ZYNQ</a> <a href="/tags/html/" style="font-size: 10px;">html</a> <a href="/tags/opencv-python/" style="font-size: 10px;">opencv python</a>
+    </div>
+    
+      <script>
+        var maxTagcloud = parseInt(17);
+        var tags_length = parseInt(3);
+        var tags_arr = [];
+        for(var i = 0; i < tags_length; i++){
+          tags_arr.push(i);
+        }
+        tags_arr.sort(function (l, r) {
+          return Math.random() > 0.5 ? -1 : 1;
+        });
+        tags_arr = tags_arr.slice(0, maxTagcloud < tags_length ? tags_length - maxTagcloud : 0);
+        for(var tag_i = 0; tag_i < tags_arr.length; tag_i++){
+          document.getElementById("randomtagcloud").children[tags_arr[tag_i]].style.display = 'none';
+        }
+      </script>
+    
+  </div>
+
+    
+        
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章归档</h3>
+    <div class="nexmoe-widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/">2025</a><span class="archive-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">最新文章</h3>
+    <div class="nexmoe-widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/08/06/RV32FD1/">RV32FD1</a>
+          </li>
+        
+          <li>
+            <a href="/2025/07/17/ZYNQ1/">ZYNQ笔记1：ZYNQ GPIO的设置与初始化</a>
+          </li>
+        
+          <li>
+            <a href="/2025/07/13/2024E/">2024E</a>
+          </li>
+        
+          <li>
+            <a href="/2025/07/12/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+   
+    <div class="nexmoe-copyright">
+        &copy; 2025 Freeb1e
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/tangyuxian/hexo-theme-tangyuxian" target="_blank">Tangyuxian</a>
+        <br><a target="_blank" href="https://beian.miit.gov.cn/">辽ICP备2021002341号</a>
+<div style="font-size: 12px">
+   <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+   本站总访问量  <a id="busuanzi_value_site_pv"></a> 次<br />
+   本站访客数<a id="busuanzi_value_site_uv"></a>人次
+</div>
+
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover">
+            <img src="/images/background/cqbackground.jpg" alt="ZYNQ笔记1：ZYNQ GPIO的设置与初始化" loading="lazy">
+            <h1>ZYNQ笔记1：ZYNQ GPIO的设置与初始化</h1>
+        </div>
+        
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2025年07月17日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/categories/%E7%94%B5%E8%B5%9B/">电赛</a>
+        
+        
+    <a><i class="nexmoefont icon-areachart"></i>约491字</a>
+    <a><i class="nexmoefont icon-time-circle-fill"></i>预计需要2分钟</a>
+
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <h1 id="ZYNQ笔记1：ZYNQ-GPIO的设置与初始化"><a href="#ZYNQ笔记1：ZYNQ-GPIO的设置与初始化" class="headerlink" title="ZYNQ笔记1：ZYNQ GPIO的设置与初始化"></a>ZYNQ笔记1：ZYNQ GPIO的设置与初始化</h1><hr>
+<h2 id="1-GPIO寄存器与API对照表"><a href="#1-GPIO寄存器与API对照表" class="headerlink" title="1. GPIO寄存器与API对照表"></a>1. GPIO寄存器与API对照表</h2><table>
+<thead>
+<tr>
+<th>功能</th>
+<th>通道</th>
+<th>Xil_底层操作</th>
+<th>XGpio_高级API</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>数据寄存器</strong></td>
+<td>通道1</td>
+<td><code>Xil_Out32(BASE + 0x0, data)</code></td>
+<td><code>XGpio_DiscreteWrite(&amp;inst, 1, data)</code></td>
+</tr>
+<tr>
+<td></td>
+<td>通道2</td>
+<td><code>Xil_Out32(BASE + 0x8, data)</code></td>
+<td><code>XGpio_DiscreteWrite(&amp;inst, 2, data)</code></td>
+</tr>
+<tr>
+<td><strong>方向寄存器</strong></td>
+<td>通道1</td>
+<td><code>Xil_Out32(BASE + 0x4, dir)</code></td>
+<td><code>XGpio_SetDataDirection(&amp;inst, 1, dir)</code></td>
+</tr>
+<tr>
+<td></td>
+<td>通道2</td>
+<td><code>Xil_Out32(BASE + 0xC, dir)</code></td>
+<td><code>XGpio_SetDataDirection(&amp;inst, 2, dir)</code></td>
+</tr>
+<tr>
+<td><strong>数据读取</strong></td>
+<td>通道1</td>
+<td><code>Xil_In32(BASE + 0x0)</code></td>
+<td><code>XGpio_DiscreteRead(&amp;inst, 1)</code></td>
+</tr>
+<tr>
+<td></td>
+<td>通道2</td>
+<td><code>Xil_In32(BASE + 0x8)</code></td>
+<td><code>XGpio_DiscreteRead(&amp;inst, 2)</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="2-GPIO常用操作宏与初始化代码"><a href="#2-GPIO常用操作宏与初始化代码" class="headerlink" title="2. GPIO常用操作宏与初始化代码"></a>2. GPIO常用操作宏与初始化代码</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// GPIO使能相关宏定义</span><br>XGpio adc_prescale_en_gpio_inst;<br><span class="hljs-meta">#<span class="hljs-keyword">define</span> SET_ADC_EN  XGpio_DiscreteWrite(&amp;adc_prescale_en_gpio_inst, 2, 1)</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> CLR_ADC_EN  XGpio_DiscreteWrite(&amp;adc_prescale_en_gpio_inst, 2, 0)</span><br><br><span class="hljs-comment">// GPIO初始化</span><br>XGpio_Initialize(&amp;adc_prescale_en_gpio_inst, XPAR_GPIO_0_DEVICE_ID);<br>XGpio_SetDataDirection(&amp;adc_data_rd_gpio_inst, <span class="hljs-number">1</span>, <span class="hljs-number">0xffff</span>);<br>XGpio_SetDataDirection(&amp;adc_data_rd_gpio_inst, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);<br>Xil_In32(XPAR_AXI_GPIO_5_BASEADDR + XGPIO_DATA_OFFSET);<br>Xil_Out32(GPIO_3_BASEADDR + <span class="hljs-number">0x4</span>, <span class="hljs-number">0x00000000</span>);<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="3-GPIO初始化函数示例"><a href="#3-GPIO初始化函数示例" class="headerlink" title="3. GPIO初始化函数示例"></a>3. GPIO初始化函数示例</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> <span class="hljs-title function_">gpio_init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    <span class="hljs-comment">// GPIO3: rst_n和en信号</span><br>    Xil_Out32(GPIO_3_BASEADDR + <span class="hljs-number">0x0</span>, <span class="hljs-number">0x00000000</span>);  <span class="hljs-comment">// 通道1数据初始化</span><br>    Xil_Out32(GPIO_3_BASEADDR + <span class="hljs-number">0x4</span>, <span class="hljs-number">0x00000000</span>);  <span class="hljs-comment">// 通道1方向：输出</span><br>    Xil_Out32(GPIO_3_BASEADDR + <span class="hljs-number">0x8</span>, <span class="hljs-number">0x00000000</span>);  <span class="hljs-comment">// 通道2数据初始化</span><br>    Xil_Out32(GPIO_3_BASEADDR + <span class="hljs-number">0xC</span>, <span class="hljs-number">0x00000000</span>);  <span class="hljs-comment">// 通道2方向：输出</span><br><br>    <span class="hljs-comment">// GPIO4: freq_word和output_mode</span><br>    Xil_Out32(GPIO_4_BASEADDR + <span class="hljs-number">0x0</span>, <span class="hljs-number">0x00000000</span>);  <span class="hljs-comment">// 通道1数据初始化</span><br>    Xil_Out32(GPIO_4_BASEADDR + <span class="hljs-number">0x4</span>, <span class="hljs-number">0x00000000</span>);  <span class="hljs-comment">// 通道1方向：输出</span><br>    Xil_Out32(GPIO_4_BASEADDR + <span class="hljs-number">0x8</span>, <span class="hljs-number">0x00000000</span>);  <span class="hljs-comment">// 通道2数据初始化</span><br>    Xil_Out32(GPIO_4_BASEADDR + <span class="hljs-number">0xC</span>, <span class="hljs-number">0x00000000</span>);  <span class="hljs-comment">// 通道2方向：输出</span><br><br>    <span class="hljs-comment">// GPIO5: final_valid输入</span><br>    Xil_Out32(GPIO_5_BASEADDR + <span class="hljs-number">0x4</span>, <span class="hljs-number">0x00000001</span>);  <span class="hljs-comment">// 通道1方向：输入</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="4-GPIO寄存器宏定义（xgpio-h）"><a href="#4-GPIO寄存器宏定义（xgpio-h）" class="headerlink" title="4. GPIO寄存器宏定义（xgpio.h）"></a>4. GPIO寄存器宏定义（xgpio.h）</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> XGPIO_L_H</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGPIO_L_H</span><br><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;xil_types.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;xil_assert.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;xil_io.h&quot;</span></span><br><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGPIO_DATA_OFFSET    0x0   <span class="hljs-comment">// 数据寄存器（通道1）</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGPIO_TRI_OFFSET     0x4   <span class="hljs-comment">// 方向寄存器（通道1）</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGPIO_DATA2_OFFSET   0x8   <span class="hljs-comment">// 数据寄存器（通道2）</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGPIO_TRI2_OFFSET    0xC   <span class="hljs-comment">// 方向寄存器（通道2）</span></span><br><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGPIO_GIE_OFFSET     0x11C <span class="hljs-comment">// 全局中断使能寄存器</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGPIO_ISR_OFFSET     0x120 <span class="hljs-comment">// 中断状态寄存器</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGPIO_IER_OFFSET     0x128 <span class="hljs-comment">// 中断使能寄存器</span></span><br><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGPIO_CHAN_OFFSET    8     <span class="hljs-comment">// 通道偏移</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGPIO_IR_MASK        0x3   <span class="hljs-comment">// 所有中断位掩码</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGPIO_IR_CH1_MASK    0x1   <span class="hljs-comment">// 通道1中断位掩码</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGPIO_IR_CH2_MASK    0x2   <span class="hljs-comment">// 通道2中断位掩码</span></span><br><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGPIO_GIE_GINTR_ENABLE_MASK 0x80000000 <span class="hljs-comment">// 全局中断使能掩码</span></span><br><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGpio_In32  Xil_In32   <span class="hljs-comment">// 输入操作</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGpio_Out32 Xil_Out32  <span class="hljs-comment">// 输出操作</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGpio_WriteReg(BaseAddress, RegOffset, Data) \</span><br><span class="hljs-meta">    XGpio_Out32((BaseAddress) + (RegOffset), (u32)(Data))</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> XGpio_ReadReg(BaseAddress, RegOffset) \</span><br><span class="hljs-meta">    XGpio_In32((BaseAddress) + (RegOffset))</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br></code></pre></td></tr></table></figure>
+
+<hr>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>Freeb1e<br>
+        
+        <strong>本文链接：</strong><a href="https://freeb1e.github.io/2025/07/17/ZYNQ1/" title="https:&#x2F;&#x2F;freeb1e.github.io&#x2F;2025&#x2F;07&#x2F;17&#x2F;ZYNQ1&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;freeb1e.github.io&#x2F;2025&#x2F;07&#x2F;17&#x2F;ZYNQ1&#x2F;</a><br>
+
+        
+            <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/ZYNQ/" rel="tag">ZYNQ</a>
+    
+</div>
+  
+  
+    <script async src="/js/copy-codeblock.js?v=1754471914120"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ZYNQ%E7%AC%94%E8%AE%B01%EF%BC%9AZYNQ-GPIO%E7%9A%84%E8%AE%BE%E7%BD%AE%E4%B8%8E%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.</span> <span class="toc-text">ZYNQ笔记1：ZYNQ GPIO的设置与初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-GPIO%E5%AF%84%E5%AD%98%E5%99%A8%E4%B8%8EAPI%E5%AF%B9%E7%85%A7%E8%A1%A8"><span class="toc-number">1.1.</span> <span class="toc-text">1. GPIO寄存器与API对照表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-GPIO%E5%B8%B8%E7%94%A8%E6%93%8D%E4%BD%9C%E5%AE%8F%E4%B8%8E%E5%88%9D%E5%A7%8B%E5%8C%96%E4%BB%A3%E7%A0%81"><span class="toc-number">1.2.</span> <span class="toc-text">2. GPIO常用操作宏与初始化代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-GPIO%E5%88%9D%E5%A7%8B%E5%8C%96%E5%87%BD%E6%95%B0%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.3.</span> <span class="toc-text">3. GPIO初始化函数示例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-GPIO%E5%AF%84%E5%AD%98%E5%99%A8%E5%AE%8F%E5%AE%9A%E4%B9%89%EF%BC%88xgpio-h%EF%BC%89"><span class="toc-number">1.4.</span> <span class="toc-text">4. GPIO寄存器宏定义（xgpio.h）</span></a></li></ol></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-pendant"><div class="nexmoe-drawer mdui-drawer nexmoe-pd" id="drawer">
+    
+        
+            <div class="nexmoe-pd-item">
+                <div class="clock">
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="needle" id="hours"></div>
+        <div class="needle" id="minutes"></div>
+        <div class="needle" id="seconds"></div>
+        <div class="clock_logo">
+
+        </div>
+
+    </div>
+<script>
+        // ----- Variable declaration
+
+        var data = {
+                dt: new Date(),
+                hours: {
+                        el: document.querySelector('#hours'),
+                        val: 0 },
+
+                minutes: {
+                        el: document.querySelector('#minutes'),
+                        val: 0 },
+
+                seconds: {
+                        el: document.querySelector('#seconds'),
+                        val: 0 },
+
+                renderTime: 1000 };
+
+
+        // ----- Clock rendering logic
+
+        updateTime = () => {
+                let hour = data.dt.getHours();
+                let minute = data.dt.getMinutes();
+                let second = data.dt.getSeconds();
+
+                data.hours.el.classList.add('moving');
+                data.minutes.el.classList.add('moving');
+                data.seconds.el.classList.add('moving');
+
+                data.hours.val = hour == 0 && data.hours.val == 59 * 6 * 5 ? 360 : hour * 6 * 5;
+                data.minutes.val = minute == 0 && data.minutes.val == 59 * 6 ? 360 : minute * 6;
+                data.seconds.val = second == 0 && data.seconds.val == 59 * 6 ? 360 : second * 6;
+
+                data.hours.el.style.transform = `translate(-50%, -75%) rotate(${data.hours.val}deg)`;
+                data.minutes.el.style.transform = `translate(-50%, -75%) rotate(${data.minutes.val}deg)`;
+                data.seconds.el.style.transform = `translate(-50%, -75%) rotate(${data.seconds.val}deg)`;
+
+                data.dt.setSeconds(second + 1);
+        };
+
+        // ----- Clock execution
+
+        setInterval(() => {
+                updateTime();
+        }, data.renderTime);
+
+        updateTime();
+
+        // ----- Events area
+
+        data.seconds.el.addEventListener('transitionend', () => {
+                data.hours.el.classList.remove('moving');
+                data.minutes.el.classList.remove('moving');
+                data.seconds.el.classList.remove('moving');
+
+                // if (data.hours.val == 360) {
+                //   data.hours.el.style.transform = 'translate(-50%, -75%) rotate(0deg)';
+                // }
+
+                if (data.minutes.val == 360) {
+                        data.minutes.el.style.transform = 'translate(-50%, -75%) rotate(0deg)';
+                }
+
+                if (data.seconds.val == 360) {
+                        data.seconds.el.style.transform = 'translate(-50%, -75%) rotate(0deg)';
+                }
+        });
+
+</script>
+<style>
+    .clock {
+        background-color: #ffffff;
+        width: 70vw;
+        height: 70vw;
+        max-width: 70vh;
+        max-height: 70vh;
+        border: solid 2.8vw var(--color-primary);
+        position: relative;
+        overflow: hidden;
+        border-radius: 50%;
+        box-sizing: border-box;
+        box-shadow: 0 1.4vw 2.8vw var(--color2);
+        zoom:0.2
+    }
+
+    .memory {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform-origin: center;
+    }
+
+    .memory:nth-child(1) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(0deg) translateY(-520%);
+    }
+
+    .memory:nth-child(2) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(6deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(3) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(12deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(4) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(18deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(5) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(24deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(6) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(30deg) translateY(-520%);
+    }
+
+    .memory:nth-child(7) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(36deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(8) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(42deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(9) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(48deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(10) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(54deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(11) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(60deg) translateY(-520%);
+    }
+
+    .memory:nth-child(12) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(66deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(13) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(72deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(14) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(78deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(15) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(84deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(16) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(90deg) translateY(-520%);
+    }
+
+    .memory:nth-child(17) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(96deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(18) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(102deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(19) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(108deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(20) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(114deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(21) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(120deg) translateY(-520%);
+    }
+
+    .memory:nth-child(22) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(126deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(23) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(132deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(24) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(138deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(25) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(144deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(26) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(150deg) translateY(-520%);
+    }
+
+    .memory:nth-child(27) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(156deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(28) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(162deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(29) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(168deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(30) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(174deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(31) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(180deg) translateY(-520%);
+    }
+
+    .memory:nth-child(32) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(186deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(33) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(192deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(34) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(198deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(35) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(204deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(36) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(210deg) translateY(-520%);
+    }
+
+    .memory:nth-child(37) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(216deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(38) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(222deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(39) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(228deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(40) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(234deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(41) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(240deg) translateY(-520%);
+    }
+
+    .memory:nth-child(42) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(246deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(43) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(252deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(44) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(258deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(45) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(264deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(46) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(270deg) translateY(-520%);
+    }
+
+    .memory:nth-child(47) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(276deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(48) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(282deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(49) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(288deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(50) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(294deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(51) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(300deg) translateY(-520%);
+    }
+
+    .memory:nth-child(52) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(306deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(53) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(312deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(54) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(318deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(55) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(324deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(56) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(330deg) translateY(-520%);
+    }
+
+    .memory:nth-child(57) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(336deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(58) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(342deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(59) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(348deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(60) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(354deg) translateY(-1461%);
+    }
+
+    .needle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform-origin: center;
+    }
+
+    .needle#hours {
+        background-color: #1f1f1f;
+        width: 4%;
+        height: 30%;
+        transform-origin: center 75%;
+        transform: translate(-50%, -75%);
+    }
+
+    .needle#hours.moving {
+        transition: transform 150ms ease-out;
+    }
+
+    .needle#hours:after {
+        content: '';
+        background-color: #1f1f1f;
+        width: 4vw;
+        height: 4vw;
+        max-width: 4vh;
+        max-height: 4vh;
+        display: block;
+        position: absolute;
+        top: 75%;
+        left: 50%;
+        box-sizing: border-box;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .needle#minutes {
+        background-color: #1f1f1f;
+        width: 2%;
+        height: 45%;
+        transform-origin: center 75%;
+        transform: translate(-50%, -75%);
+    }
+
+    .needle#minutes.moving {
+        transition: transform 150ms ease-out;
+    }
+
+    .needle#minutes:after {
+        content: '';
+        background-color: #1f1f1f;
+        width: 4vw;
+        height: 4vw;
+        max-width: 4vh;
+        max-height: 4vh;
+        display: block;
+        position: absolute;
+        top: 75%;
+        left: 50%;
+        box-sizing: border-box;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .needle#seconds {
+        background-color: #cb2f2f;
+        width: 1%;
+        height: 50%;
+        transform-origin: center 75%;
+        transform: translate(-50%, -75%);
+    }
+
+    .needle#seconds.moving {
+        transition: transform 150ms ease-out;
+    }
+
+    .needle#seconds:after {
+        content: '';
+        background-color: #cb2f2f;
+        width: 2.5vw;
+        height: 2.5vw;
+        max-width: 2.5vh;
+        max-height: 2.5vh;
+        display: block;
+        position: absolute;
+        top: 75%;
+        left: 50%;
+        box-sizing: border-box;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .clock_logo{
+        width: 10vw;
+        height: 10vw;
+        max-width: 10vh;
+        max-height: 10vh;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        box-sizing: border-box;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+    }
+    .clock_logo{
+            width: 10vw;
+            height: 10vw;
+            max-width: 10vh;
+            max-height: 10vh;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            box-sizing: border-box;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            background-image: var(--clock-logo);
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+    }
+    @media (min-width: 100vh) {
+        .clock {
+            border: solid 2.8vh var(--color-primary);
+            box-shadow: 0 1.4vh 2.8vh var(--color2);
+        }
+    }
+
+</style>
+
+
+
+
+
+            </div>
+        
+    
+</div>
+<style>
+    .nexmoe-pd {
+        left: auto;
+        top: 40px;
+        right: 0;
+    }
+    .nexmoe-pd-item{
+       display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    #nexmoe-pendant .mdui-drawer{
+        width: 305px;
+    }
+    @media screen and (max-width: 1600px) {
+        #nexmoe-pendant {
+            display: none
+        }
+    }
+</style>
+</div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div></div></body></html>

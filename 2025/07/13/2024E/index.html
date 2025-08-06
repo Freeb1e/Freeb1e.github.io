@@ -1,0 +1,1183 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>2024E - Hexo</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/images/head/head.png" type="image/png" />
+<meta name="description" content="三子棋游戏装置摘要：本设计实现了一种基于视觉识别的三子棋游戏装置，具备机械臂自动落子、智能对弈及防悔棋等功能。系统采用模块化设计，由三大核心部分组成：  控制模块：STM32微控制器与六轴机械臂协同工作。 图像识别模块：树莓派搭载高精度摄像头实现棋盘状态检测。 人机交互模块：串口屏提供可视化操作界面。  用户通过串口屏触发游戏指令后，图像识别模块实时扫描棋盘信息，并通过串口通信控制机械臂执行预编程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2024E">
+<meta property="og:url" content="https://freeb1e.github.io/2025/07/13/2024E/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="三子棋游戏装置摘要：本设计实现了一种基于视觉识别的三子棋游戏装置，具备机械臂自动落子、智能对弈及防悔棋等功能。系统采用模块化设计，由三大核心部分组成：  控制模块：STM32微控制器与六轴机械臂协同工作。 图像识别模块：树莓派搭载高精度摄像头实现棋盘状态检测。 人机交互模块：串口屏提供可视化操作界面。  用户通过串口屏触发游戏指令后，图像识别模块实时扫描棋盘信息，并通过串口通信控制机械臂执行预编程">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://freeb1e.github.io/images/post/2024E/2024E%E6%B5%81%E7%A8%8B%E5%9B%BE.png">
+<meta property="og:image" content="https://freeb1e.github.io/images/post/2024E/%E5%87%B9%E6%A7%BD.jpg">
+<meta property="og:image" content="https://freeb1e.github.io/images/post/2024E/%E6%A3%8B%E7%9B%98.jpg">
+<meta property="og:image" content="https://freeb1e.github.io/images/post/2024E/%E4%B8%B2%E5%8F%A3.png">
+<meta property="article:published_time" content="2025-07-12T17:23:44.000Z">
+<meta property="article:modified_time" content="2025-08-06T09:08:35.006Z">
+<meta property="article:author" content="Freeb1e">
+<meta property="article:tag" content="opencv python">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://freeb1e.github.io/images/post/2024E/2024E%E6%B5%81%E7%A8%8B%E5%9B%BE.png">
+
+<link rel="stylesheet" href="/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1754471914164">
+
+    <link rel="stylesheet" href="//at.alicdn.com/t/c/font_4973540_zvbcq95ih5n.css">
+
+<link rel="stylesheet" href="/css/style.css?v=1754471914164">
+
+
+
+
+    
+        <link rel="stylesheet" href="/custom.css?v=1754471914164">
+    
+        <link rel="stylesheet" href="/themes/umaru/index.css?v=1754471914164">
+    
+        <link rel="stylesheet" href="/themes/asuka/index.css?v=1754471914164">
+    
+
+
+
+<script src="/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/lib/lax.min.js" async></script>
+
+
+<script async src="/js/app.js?v=1754471914165"></script>
+
+ 
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1Z7TFL96ZH"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1Z7TFL96ZH');
+</script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<meta name="generator" content="Hexo 7.3.0"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(/images/background/cqbackground.jpg)"></div><div class="nexmoe-character"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/" title="Freeb1e"><img src="/images/head/liuhua.png" alt="Freeb1e"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/" title="Freeb1e">
+            <img src="/images/head/liuhua.png" alt="Freeb1e" alt="Freeb1e">
+        </a>
+    </div>
+
+  
+  <p class="avatar-id"> Freeb1e</p>
+
+    <div class="nexmoe-count">
+        <div class="nexmoe-count-item"><span>文章</span>4 <div class="item-radius"></div><div class="item-radius item-right"></div> </div>
+        <div class="nexmoe-count-item"><span>标签</span>3<div class="item-radius"></div><div class="item-radius item-right"></div></div>
+        <div class="nexmoe-count-item"><span>分类</span>2<div class="item-radius"></div><div class="item-radius item-right"></div></div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/" title="回到首页">
+            <i class="mdui-list-item-icon nexmoefont icon-zhuye"></i>
+            <div class="mdui-list-item-content">
+                回到首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/archives.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-shejiwenzhang"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/about.html" title="关于Freeb1e">
+            <i class="mdui-list-item-icon nexmoefont icon-guanyuwo"></i>
+            <div class="mdui-list-item-content">
+                关于Freeb1e
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="mailto:gaoxiao43@163.com"
+			target="_blank"
+			mdui-tooltip="{content: 'mail'}"
+			style="
+				color: rgb(249,8,8);
+				background-color: rgba(249,8,8,.1);
+			"
+		>
+			<i
+				class="nexmoefont icon-mail-fill"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/freeb1e/"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .15);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/1355533530"
+			target="_blank"
+			mdui-tooltip="{content: 'bilibili'}"
+			style="
+				color: rgb(71, 159, 209);
+				background-color: rgba(71, 159, 209, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/电赛/">电赛</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/网页前端/">网页前端</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+         
+            <form id="search_form" action_e="https://cn.bing.com/search?q=site:freeb1e.github.io" onsubmit="return search();">
+                <label><input id="search_value" name="q" type="search" placeholder="搜索"></label>
+            </form>
+         
+    </div>
+</div>
+
+
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
+      <a href="/tags/ZYNQ/" style="font-size: 10px;">ZYNQ</a> <a href="/tags/html/" style="font-size: 10px;">html</a> <a href="/tags/opencv-python/" style="font-size: 10px;">opencv python</a>
+    </div>
+    
+      <script>
+        var maxTagcloud = parseInt(17);
+        var tags_length = parseInt(3);
+        var tags_arr = [];
+        for(var i = 0; i < tags_length; i++){
+          tags_arr.push(i);
+        }
+        tags_arr.sort(function (l, r) {
+          return Math.random() > 0.5 ? -1 : 1;
+        });
+        tags_arr = tags_arr.slice(0, maxTagcloud < tags_length ? tags_length - maxTagcloud : 0);
+        for(var tag_i = 0; tag_i < tags_arr.length; tag_i++){
+          document.getElementById("randomtagcloud").children[tags_arr[tag_i]].style.display = 'none';
+        }
+      </script>
+    
+  </div>
+
+    
+        
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章归档</h3>
+    <div class="nexmoe-widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/">2025</a><span class="archive-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">最新文章</h3>
+    <div class="nexmoe-widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/08/06/RV32FD1/">RV32FD1</a>
+          </li>
+        
+          <li>
+            <a href="/2025/07/17/ZYNQ1/">ZYNQ笔记1：ZYNQ GPIO的设置与初始化</a>
+          </li>
+        
+          <li>
+            <a href="/2025/07/13/2024E/">2024E</a>
+          </li>
+        
+          <li>
+            <a href="/2025/07/12/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+   
+    <div class="nexmoe-copyright">
+        &copy; 2025 Freeb1e
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/tangyuxian/hexo-theme-tangyuxian" target="_blank">Tangyuxian</a>
+        <br><a target="_blank" href="https://beian.miit.gov.cn/">辽ICP备2021002341号</a>
+<div style="font-size: 12px">
+   <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+   本站总访问量  <a id="busuanzi_value_site_pv"></a> 次<br />
+   本站访客数<a id="busuanzi_value_site_uv"></a>人次
+</div>
+
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: 46.403712296983755%;"> 
+            <img src="/images/post/2024E/2024Ejixiebi.jpg" alt="2024E" loading="lazy">
+            <h1>2024E</h1>
+        </div>
+        
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2025年07月13日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/categories/%E7%94%B5%E8%B5%9B/">电赛</a>
+        
+        
+    <a><i class="nexmoefont icon-areachart"></i>约2.1k字</a>
+    <a><i class="nexmoefont icon-time-circle-fill"></i>预计需要7分钟</a>
+
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <h1 id="三子棋游戏装置"><a href="#三子棋游戏装置" class="headerlink" title="三子棋游戏装置"></a>三子棋游戏装置</h1><p><strong>摘要</strong>：本设计实现了一种基于视觉识别的三子棋游戏装置，具备机械臂自动落子、智能对弈及防悔棋等功能。系统采用模块化设计，由三大核心部分组成：</p>
+<ul>
+<li><strong>控制模块</strong>：STM32微控制器与六轴机械臂协同工作。</li>
+<li><strong>图像识别模块</strong>：树莓派搭载高精度摄像头实现棋盘状态检测。</li>
+<li><strong>人机交互模块</strong>：串口屏提供可视化操作界面。</li>
+</ul>
+<p>用户通过串口屏触发游戏指令后，图像识别模块实时扫描棋盘信息，并通过串口通信控制机械臂执行预编程动作组，完成高精度落子操作。该系统融合了计算机视觉与机电控制技术，实现了三子棋对弈的自动化与智能化。<br><strong>关键词</strong>：计算机视觉；树莓派；六轴机械臂；动作组编程；STM32；人机交互</p>
+<hr>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/images/post/2024E/2024E%E6%B5%81%E7%A8%8B%E5%9B%BE.png" alt="设计流程图" data-caption="设计流程图" loading="lazy"></p>
+<h2 id="二、程序设计"><a href="#二、程序设计" class="headerlink" title="二、程序设计"></a>二、程序设计</h2><h3 id="1-棋子位置的图像识别设计"><a href="#1-棋子位置的图像识别设计" class="headerlink" title="1. 棋子位置的图像识别设计"></a>1. 棋子位置的图像识别设计</h3><p>图像识别的关键是准确地将拍摄到的棋子的位置映射到三子棋九宫格的棋盘之上。我们设计的图像处理步骤主要分为两步：</p>
+<ol>
+<li>提取所拍摄图像的棋盘区域。</li>
+<li>在棋盘区域内识别棋子信息。</li>
+</ol>
+<h4 id="1-1-提取所拍摄图像的棋盘区域"><a href="#1-1-提取所拍摄图像的棋盘区域" class="headerlink" title="1.1 提取所拍摄图像的棋盘区域"></a>1.1 提取所拍摄图像的棋盘区域</h4><h5 id="1-1-1-预处理与寻找最大矩形"><a href="#1-1-1-预处理与寻找最大矩形" class="headerlink" title="1.1.1 预处理与寻找最大矩形"></a>1.1.1 预处理与寻找最大矩形</h5><p>设计 <code>getContours</code> 函数，将图像灰度化、模糊、Canny 边缘检测，然后膨胀和腐蚀，提取外部轮廓。在提取到的所有矩形轮廓中，选取最大的矩形轮廓作为棋域。</p>
+<h5 id="1-1-2-从视频中截取出矩形区域"><a href="#1-1-2-从视频中截取出矩形区域" class="headerlink" title="1.1.2 从视频中截取出矩形区域"></a>1.1.2 从视频中截取出矩形区域</h5><p>设计 <code>recoder</code> 函数，对识别为棋盘的矩形区域的四个顶点进行排序，确保顺序为左上、右上、左下、右下。这样可以使得矩形在提取过后的朝向确定。</p>
+<h5 id="1-1-3-透视变换"><a href="#1-1-3-透视变换" class="headerlink" title="1.1.3 透视变换"></a>1.1.3 透视变换</h5><p>设计 <code>warpImg</code> 函数，利用排序后的顶点和目标宽高，计算透视变换矩阵，将棋盘区域裁剪并拉正为标准正方形状，并规定画面大小为 300×300。这样的操作不仅可以精简下一步的识别区域，降低对于摄像头精确位置的依赖，也有助于减少因为摄像头倾斜等问题造成的识别误差。</p>
+<h4 id="1-2-在棋盘边沿内识别棋子信息"><a href="#1-2-在棋盘边沿内识别棋子信息" class="headerlink" title="1.2 在棋盘边沿内识别棋子信息"></a>1.2 在棋盘边沿内识别棋子信息</h4><h5 id="1-2-1-圆检测"><a href="#1-2-1-圆检测" class="headerlink" title="1.2.1 圆检测"></a>1.2.1 圆检测</h5><p>使用 OpenCV 库自带函数 <code>cv2.HoughCircles</code> 提取经过预处理后的图像中的圆形轮廓。在检测的过程中调节函数参数，根据棋子的大小设置只保留画布中半径大小在 20 到 50 像素的圆形，并且抛弃圆心距离在 20 像素以内的圆形。能够起到非常精确的检测圆形的效果。</p>
+<h5 id="1-2-2-棋子颜色判定"><a href="#1-2-2-棋子颜色判定" class="headerlink" title="1.2.2 棋子颜色判定"></a>1.2.2 棋子颜色判定</h5><p>为了提高判定的精准性，取检测到的棋子圆心坐标的范围之内的像素的亮度进行加权平均作为棋子颜色的特征，用 100 作为阈值可以分辨出黑子和白子。</p>
+<h5 id="1-2-3-棋子坐标的判定"><a href="#1-2-3-棋子坐标的判定" class="headerlink" title="1.2.3 棋子坐标的判定"></a>1.2.3 棋子坐标的判定</h5><p>遍历每个圆，取其圆心坐标，通过整除 100 并加 1 的方法将像素坐标映射到棋盘的行列索引。</p>
+<h3 id="2-三子棋对弈程序的设计"><a href="#2-三子棋对弈程序的设计" class="headerlink" title="2. 三子棋对弈程序的设计"></a>2. 三子棋对弈程序的设计</h3><h4 id="2-1-人机对弈算法的设计"><a href="#2-1-人机对弈算法的设计" class="headerlink" title="2.1 人机对弈算法的设计"></a>2.1 人机对弈算法的设计</h4><p>由于井字棋具有游戏必须是有限步数、完全信息、零和且双方轮流行动的特点，故使用 Minimax 算法能够非常精确地找出机器端所能做出的最佳决策。设计 <code>minmax</code> 函数，会递归地遍历当前棋盘所有可能的落子情况：</p>
+<ol>
+<li>首先寻找所有空位，然后依次尝试每一个空位的落子。</li>
+<li>每次落子后递归调用自身，切换到对方玩家，继续模拟后续所有可能的对局发展。</li>
+<li>每当遇到终局（胜负或平局），就返回一个分值（如电脑胜利返回 1，玩家胜利返回 -1，平局返回 0）。</li>
+</ol>
+<p>递归返回时，电脑（’X’）会选择分值最大的步骤，玩家（’O’）会选择分值最小的步骤，这样保证每一步都做出对自己最有利的选择。为了让对局结果不显单调，我们会找出所有相同优秀的步骤，然后在可供选择的步骤里面进行随机选择，提高了对局的丰富性。</p>
+<h4 id="2-2-悔棋检测"><a href="#2-2-悔棋检测" class="headerlink" title="2.2 悔棋检测"></a>2.2 悔棋检测</h4><p>设置 <code>buffer</code> 对上一次对弈之后的棋盘进行存储，并且只保留机器落下的棋子。在下一次轮到机器下棋之前进行检测，通过寻找存储字符串之间的差异就可以找出唯一被移动的棋子进行还原。</p>
+<hr>
+<h2 id="三、硬件平台搭建设计"><a href="#三、硬件平台搭建设计" class="headerlink" title="三、硬件平台搭建设计"></a>三、硬件平台搭建设计</h2><h3 id="3-1-摄像头与机械臂的固定"><a href="#3-1-摄像头与机械臂的固定" class="headerlink" title="3.1 摄像头与机械臂的固定"></a>3.1 摄像头与机械臂的固定</h3><p>将摄像头的位置高度经图像程序测定后固定，确保视野覆盖良好，机械臂与摄像头定位确保无冲突，可固定抓取。</p>
+<h3 id="3-2-棋盘选择"><a href="#3-2-棋盘选择" class="headerlink" title="3.2 棋盘选择"></a>3.2 棋盘选择</h3><p>经图像程序识别，得到绿色的棋盘效果较良好。</p>
+<h3 id="3-3-棋子摆放"><a href="#3-3-棋子摆放" class="headerlink" title="3.3 棋子摆放"></a>3.3 棋子摆放</h3><p>设计棋子摆放的凹槽，可以确保棋子摆放的位置，将黑白棋子分别放在两侧。</p>
+<h3 id="3-4-棋子棋盘建模"><a href="#3-4-棋子棋盘建模" class="headerlink" title="3.4 棋子棋盘建模"></a>3.4 棋子棋盘建模</h3><p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/images/post/2024E/%E5%87%B9%E6%A7%BD.jpg" alt="棋子摆放的凹槽" data-caption="棋子摆放的凹槽" loading="lazy"><br><img onerror="imgOnError(this);" data-fancybox="gallery" src="/images/post/2024E/%E6%A3%8B%E7%9B%98.jpg" alt="棋盘" data-caption="棋盘" loading="lazy"></p>
+<hr>
+<h2 id="四、硬件各部分的串口通信协议"><a href="#四、硬件各部分的串口通信协议" class="headerlink" title="四、硬件各部分的串口通信协议"></a>四、硬件各部分的串口通信协议</h2><p>如图，本系统利用 STM32 的 3 个串口实现多模块协同控制：</p>
+<ol>
+<li><strong>UART1</strong>：负责与树莓派通信，传输指令触发摄像头识别流程。具体表现为：当游戏启动时，STM32 发送识别指令至树莓派，树莓派完成图像识别后回传目标动作组编号。</li>
+<li><strong>UART3</strong>：用于驱动机械臂，STM32 将接收到的动作组编号转发至机械臂控制器，调用其预存的动作组完成精准落子。</li>
+<li><strong>UART6</strong>：连接串口屏实现人机交互，用户点击 “开始下棋” 按钮后，STM32 通过该接口同步触发树莓派识别流程，并在机械臂动作执行期间，实时更新运行时间至串口屏显示，增强操作可视性。</li>
+</ol>
+<h2 id=""><a href="#" class="headerlink" title="  "></a><img onerror="imgOnError(this);" data-fancybox="gallery" src="/images/post/2024E/%E4%B8%B2%E5%8F%A3.png" alt="串口流程图" data-caption="串口流程图" loading="lazy">  </h2><h2 id="五、性能测试"><a href="#五、性能测试" class="headerlink" title="五、性能测试"></a>五、性能测试</h2><h3 id="5-1-测试环境"><a href="#5-1-测试环境" class="headerlink" title="5.1 测试环境"></a>5.1 测试环境</h3><p>正常室内照明环境，无特殊照明条件要求。</p>
+<h3 id="5-2-测试方案"><a href="#5-2-测试方案" class="headerlink" title="5.2 测试方案"></a>5.2 测试方案</h3><h4 id="5-2-1-图像识别测试方案"><a href="#5-2-1-图像识别测试方案" class="headerlink" title="5.2.1 图像识别测试方案"></a>5.2.1 图像识别测试方案</h4><p>分别将黑色棋子和白色棋子放置在棋盘的九个位置上进行测试。</p>
+<h4 id="5-2-2-机械臂动作组测试方案"><a href="#5-2-2-机械臂动作组测试方案" class="headerlink" title="5.2.2 机械臂动作组测试方案"></a>5.2.2 机械臂动作组测试方案</h4><ol>
+<li>测试机械臂的动作组是否准确将棋子从初始位置放置到棋盘的九个位置上。</li>
+<li>测试机械臂的动作组是否准确将棋子从棋盘上的任意一个位置移动到另外一个位置。</li>
+</ol>
+<h4 id="5-2-3-人机对弈测试方案"><a href="#5-2-3-人机对弈测试方案" class="headerlink" title="5.2.3 人机对弈测试方案"></a>5.2.3 人机对弈测试方案</h4><ol>
+<li>人先手下棋对弈测试。</li>
+<li>机先手下棋对弈测试。</li>
+<li>反复悔棋测试。</li>
+</ol>
+<h3 id="5-3-测试结果分析"><a href="#5-3-测试结果分析" class="headerlink" title="5.3 测试结果分析"></a>5.3 测试结果分析</h3><h4 id="5-3-1-图像识别测试"><a href="#5-3-1-图像识别测试" class="headerlink" title="5.3.1 图像识别测试"></a>5.3.1 图像识别测试</h4><p>经测试，由树莓派和摄像头构成的图像识别模块能够准确地识别判断出棋盘上各个棋子的位置和颜色。</p>
+<h4 id="5-3-2-机械臂动作组测试"><a href="#5-3-2-机械臂动作组测试" class="headerlink" title="5.3.2 机械臂动作组测试"></a>5.3.2 机械臂动作组测试</h4><ol>
+<li>经测试，机械臂能够将棋子从棋盘外抓取，精确地放置于棋盘内正确的位置，且不会压到黑色实线。</li>
+<li>经测试，机械臂能够精确地将棋子从棋盘内一个位置抓取到棋盘内另一个位置，且不会碰到其他棋子。</li>
+<li>经测试，机械臂能够将人移动的棋子移回原位，且不会碰到其他棋子。</li>
+</ol>
+<h4 id="5-3-3-人机对弈测试"><a href="#5-3-3-人机对弈测试" class="headerlink" title="5.3.3 人机对弈测试"></a>5.3.3 人机对弈测试</h4><ol>
+<li>经测试，装置在先手的情况下，若人第一步下错，装置可以保证赢棋。</li>
+<li>在后手的情况下，装置可以保证不输棋。</li>
+</ol>
+<hr>
+<h2 id="六、参考文献"><a href="#六、参考文献" class="headerlink" title="六、参考文献"></a>六、参考文献</h2><ol>
+<li>罗杰,谢自美.电子线路-设计·实验·测试(第五版),2015,电子工业出版社.</li>
+<li>康华光.电子技术基础(模拟部分)(第六版).2013,高等教育出版社.</li>
+<li>[美]Bruce Carter.运算放大器权威指南(第四版)2014,人民邮电出版社.</li>
+<li>全国大学生电子设计竞赛组委会.第十一届全国大学生电子设计竞赛获奖作品选编,北京理工大学出版社.</li>
+</ol>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>Freeb1e<br>
+        
+        <strong>本文链接：</strong><a href="https://freeb1e.github.io/2025/07/13/2024E/" title="https:&#x2F;&#x2F;freeb1e.github.io&#x2F;2025&#x2F;07&#x2F;13&#x2F;2024E&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;freeb1e.github.io&#x2F;2025&#x2F;07&#x2F;13&#x2F;2024E&#x2F;</a><br>
+
+        
+            <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/opencv-python/" rel="tag">opencv python</a>
+    
+</div>
+  
+  
+    <script async src="/js/copy-codeblock.js?v=1754471914125"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E5%AD%90%E6%A3%8B%E6%B8%B8%E6%88%8F%E8%A3%85%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text">三子棋游戏装置</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.1.</span> <span class="toc-text">二、程序设计</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A3%8B%E5%AD%90%E4%BD%8D%E7%BD%AE%E7%9A%84%E5%9B%BE%E5%83%8F%E8%AF%86%E5%88%AB%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 棋子位置的图像识别设计</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-%E6%8F%90%E5%8F%96%E6%89%80%E6%8B%8D%E6%91%84%E5%9B%BE%E5%83%8F%E7%9A%84%E6%A3%8B%E7%9B%98%E5%8C%BA%E5%9F%9F"><span class="toc-number">1.1.1.1.</span> <span class="toc-text">1.1 提取所拍摄图像的棋盘区域</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-1-1-%E9%A2%84%E5%A4%84%E7%90%86%E4%B8%8E%E5%AF%BB%E6%89%BE%E6%9C%80%E5%A4%A7%E7%9F%A9%E5%BD%A2"><span class="toc-number">1.1.1.1.1.</span> <span class="toc-text">1.1.1 预处理与寻找最大矩形</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-1-2-%E4%BB%8E%E8%A7%86%E9%A2%91%E4%B8%AD%E6%88%AA%E5%8F%96%E5%87%BA%E7%9F%A9%E5%BD%A2%E5%8C%BA%E5%9F%9F"><span class="toc-number">1.1.1.1.2.</span> <span class="toc-text">1.1.2 从视频中截取出矩形区域</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-1-3-%E9%80%8F%E8%A7%86%E5%8F%98%E6%8D%A2"><span class="toc-number">1.1.1.1.3.</span> <span class="toc-text">1.1.3 透视变换</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-%E5%9C%A8%E6%A3%8B%E7%9B%98%E8%BE%B9%E6%B2%BF%E5%86%85%E8%AF%86%E5%88%AB%E6%A3%8B%E5%AD%90%E4%BF%A1%E6%81%AF"><span class="toc-number">1.1.1.2.</span> <span class="toc-text">1.2 在棋盘边沿内识别棋子信息</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-2-1-%E5%9C%86%E6%A3%80%E6%B5%8B"><span class="toc-number">1.1.1.2.1.</span> <span class="toc-text">1.2.1 圆检测</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-2-2-%E6%A3%8B%E5%AD%90%E9%A2%9C%E8%89%B2%E5%88%A4%E5%AE%9A"><span class="toc-number">1.1.1.2.2.</span> <span class="toc-text">1.2.2 棋子颜色判定</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-2-3-%E6%A3%8B%E5%AD%90%E5%9D%90%E6%A0%87%E7%9A%84%E5%88%A4%E5%AE%9A"><span class="toc-number">1.1.1.2.3.</span> <span class="toc-text">1.2.3 棋子坐标的判定</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%B8%89%E5%AD%90%E6%A3%8B%E5%AF%B9%E5%BC%88%E7%A8%8B%E5%BA%8F%E7%9A%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 三子棋对弈程序的设计</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-%E4%BA%BA%E6%9C%BA%E5%AF%B9%E5%BC%88%E7%AE%97%E6%B3%95%E7%9A%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">2.1 人机对弈算法的设计</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-%E6%82%94%E6%A3%8B%E6%A3%80%E6%B5%8B"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">2.2 悔棋检测</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.2.</span> <span class="toc-text">三、硬件平台搭建设计</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E6%91%84%E5%83%8F%E5%A4%B4%E4%B8%8E%E6%9C%BA%E6%A2%B0%E8%87%82%E7%9A%84%E5%9B%BA%E5%AE%9A"><span class="toc-number">1.2.1.</span> <span class="toc-text">3.1 摄像头与机械臂的固定</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E6%A3%8B%E7%9B%98%E9%80%89%E6%8B%A9"><span class="toc-number">1.2.2.</span> <span class="toc-text">3.2 棋盘选择</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E6%A3%8B%E5%AD%90%E6%91%86%E6%94%BE"><span class="toc-number">1.2.3.</span> <span class="toc-text">3.3 棋子摆放</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E6%A3%8B%E5%AD%90%E6%A3%8B%E7%9B%98%E5%BB%BA%E6%A8%A1"><span class="toc-number">1.2.4.</span> <span class="toc-text">3.4 棋子棋盘建模</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E7%A1%AC%E4%BB%B6%E5%90%84%E9%83%A8%E5%88%86%E7%9A%84%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE"><span class="toc-number">1.3.</span> <span class="toc-text">四、硬件各部分的串口通信协议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">1.4.</span> <span class="toc-text">  </span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95"><span class="toc-number">1.5.</span> <span class="toc-text">五、性能测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E6%B5%8B%E8%AF%95%E7%8E%AF%E5%A2%83"><span class="toc-number">1.5.1.</span> <span class="toc-text">5.1 测试环境</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E6%B5%8B%E8%AF%95%E6%96%B9%E6%A1%88"><span class="toc-number">1.5.2.</span> <span class="toc-text">5.2 测试方案</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-2-1-%E5%9B%BE%E5%83%8F%E8%AF%86%E5%88%AB%E6%B5%8B%E8%AF%95%E6%96%B9%E6%A1%88"><span class="toc-number">1.5.2.1.</span> <span class="toc-text">5.2.1 图像识别测试方案</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-2-2-%E6%9C%BA%E6%A2%B0%E8%87%82%E5%8A%A8%E4%BD%9C%E7%BB%84%E6%B5%8B%E8%AF%95%E6%96%B9%E6%A1%88"><span class="toc-number">1.5.2.2.</span> <span class="toc-text">5.2.2 机械臂动作组测试方案</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-2-3-%E4%BA%BA%E6%9C%BA%E5%AF%B9%E5%BC%88%E6%B5%8B%E8%AF%95%E6%96%B9%E6%A1%88"><span class="toc-number">1.5.2.3.</span> <span class="toc-text">5.2.3 人机对弈测试方案</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C%E5%88%86%E6%9E%90"><span class="toc-number">1.5.3.</span> <span class="toc-text">5.3 测试结果分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-3-1-%E5%9B%BE%E5%83%8F%E8%AF%86%E5%88%AB%E6%B5%8B%E8%AF%95"><span class="toc-number">1.5.3.1.</span> <span class="toc-text">5.3.1 图像识别测试</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-3-2-%E6%9C%BA%E6%A2%B0%E8%87%82%E5%8A%A8%E4%BD%9C%E7%BB%84%E6%B5%8B%E8%AF%95"><span class="toc-number">1.5.3.2.</span> <span class="toc-text">5.3.2 机械臂动作组测试</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-3-3-%E4%BA%BA%E6%9C%BA%E5%AF%B9%E5%BC%88%E6%B5%8B%E8%AF%95"><span class="toc-number">1.5.3.3.</span> <span class="toc-text">5.3.3 人机对弈测试</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="toc-number">1.6.</span> <span class="toc-text">六、参考文献</span></a></li></ol></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-pendant"><div class="nexmoe-drawer mdui-drawer nexmoe-pd" id="drawer">
+    
+        
+            <div class="nexmoe-pd-item">
+                <div class="clock">
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="memory"></div>
+        <div class="needle" id="hours"></div>
+        <div class="needle" id="minutes"></div>
+        <div class="needle" id="seconds"></div>
+        <div class="clock_logo">
+
+        </div>
+
+    </div>
+<script>
+        // ----- Variable declaration
+
+        var data = {
+                dt: new Date(),
+                hours: {
+                        el: document.querySelector('#hours'),
+                        val: 0 },
+
+                minutes: {
+                        el: document.querySelector('#minutes'),
+                        val: 0 },
+
+                seconds: {
+                        el: document.querySelector('#seconds'),
+                        val: 0 },
+
+                renderTime: 1000 };
+
+
+        // ----- Clock rendering logic
+
+        updateTime = () => {
+                let hour = data.dt.getHours();
+                let minute = data.dt.getMinutes();
+                let second = data.dt.getSeconds();
+
+                data.hours.el.classList.add('moving');
+                data.minutes.el.classList.add('moving');
+                data.seconds.el.classList.add('moving');
+
+                data.hours.val = hour == 0 && data.hours.val == 59 * 6 * 5 ? 360 : hour * 6 * 5;
+                data.minutes.val = minute == 0 && data.minutes.val == 59 * 6 ? 360 : minute * 6;
+                data.seconds.val = second == 0 && data.seconds.val == 59 * 6 ? 360 : second * 6;
+
+                data.hours.el.style.transform = `translate(-50%, -75%) rotate(${data.hours.val}deg)`;
+                data.minutes.el.style.transform = `translate(-50%, -75%) rotate(${data.minutes.val}deg)`;
+                data.seconds.el.style.transform = `translate(-50%, -75%) rotate(${data.seconds.val}deg)`;
+
+                data.dt.setSeconds(second + 1);
+        };
+
+        // ----- Clock execution
+
+        setInterval(() => {
+                updateTime();
+        }, data.renderTime);
+
+        updateTime();
+
+        // ----- Events area
+
+        data.seconds.el.addEventListener('transitionend', () => {
+                data.hours.el.classList.remove('moving');
+                data.minutes.el.classList.remove('moving');
+                data.seconds.el.classList.remove('moving');
+
+                // if (data.hours.val == 360) {
+                //   data.hours.el.style.transform = 'translate(-50%, -75%) rotate(0deg)';
+                // }
+
+                if (data.minutes.val == 360) {
+                        data.minutes.el.style.transform = 'translate(-50%, -75%) rotate(0deg)';
+                }
+
+                if (data.seconds.val == 360) {
+                        data.seconds.el.style.transform = 'translate(-50%, -75%) rotate(0deg)';
+                }
+        });
+
+</script>
+<style>
+    .clock {
+        background-color: #ffffff;
+        width: 70vw;
+        height: 70vw;
+        max-width: 70vh;
+        max-height: 70vh;
+        border: solid 2.8vw var(--color-primary);
+        position: relative;
+        overflow: hidden;
+        border-radius: 50%;
+        box-sizing: border-box;
+        box-shadow: 0 1.4vw 2.8vw var(--color2);
+        zoom:0.2
+    }
+
+    .memory {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform-origin: center;
+    }
+
+    .memory:nth-child(1) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(0deg) translateY(-520%);
+    }
+
+    .memory:nth-child(2) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(6deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(3) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(12deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(4) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(18deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(5) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(24deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(6) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(30deg) translateY(-520%);
+    }
+
+    .memory:nth-child(7) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(36deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(8) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(42deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(9) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(48deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(10) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(54deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(11) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(60deg) translateY(-520%);
+    }
+
+    .memory:nth-child(12) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(66deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(13) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(72deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(14) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(78deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(15) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(84deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(16) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(90deg) translateY(-520%);
+    }
+
+    .memory:nth-child(17) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(96deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(18) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(102deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(19) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(108deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(20) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(114deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(21) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(120deg) translateY(-520%);
+    }
+
+    .memory:nth-child(22) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(126deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(23) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(132deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(24) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(138deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(25) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(144deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(26) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(150deg) translateY(-520%);
+    }
+
+    .memory:nth-child(27) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(156deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(28) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(162deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(29) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(168deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(30) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(174deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(31) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(180deg) translateY(-520%);
+    }
+
+    .memory:nth-child(32) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(186deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(33) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(192deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(34) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(198deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(35) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(204deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(36) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(210deg) translateY(-520%);
+    }
+
+    .memory:nth-child(37) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(216deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(38) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(222deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(39) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(228deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(40) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(234deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(41) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(240deg) translateY(-520%);
+    }
+
+    .memory:nth-child(42) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(246deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(43) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(252deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(44) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(258deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(45) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(264deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(46) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(270deg) translateY(-520%);
+    }
+
+    .memory:nth-child(47) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(276deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(48) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(282deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(49) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(288deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(50) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(294deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(51) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(300deg) translateY(-520%);
+    }
+
+    .memory:nth-child(52) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(306deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(53) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(312deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(54) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(318deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(55) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(324deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(56) {
+        background-color: var(--color-primary);
+        width: 2%;
+        height: 8%;
+        transform: translate(-50%, -50%) rotate(330deg) translateY(-520%);
+    }
+
+    .memory:nth-child(57) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(336deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(58) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(342deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(59) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(348deg) translateY(-1461%);
+    }
+
+    .memory:nth-child(60) {
+        background-color: #949494;
+        width: 1%;
+        height: 3%;
+        transform: translate(-50%, -50%) rotate(354deg) translateY(-1461%);
+    }
+
+    .needle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform-origin: center;
+    }
+
+    .needle#hours {
+        background-color: #1f1f1f;
+        width: 4%;
+        height: 30%;
+        transform-origin: center 75%;
+        transform: translate(-50%, -75%);
+    }
+
+    .needle#hours.moving {
+        transition: transform 150ms ease-out;
+    }
+
+    .needle#hours:after {
+        content: '';
+        background-color: #1f1f1f;
+        width: 4vw;
+        height: 4vw;
+        max-width: 4vh;
+        max-height: 4vh;
+        display: block;
+        position: absolute;
+        top: 75%;
+        left: 50%;
+        box-sizing: border-box;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .needle#minutes {
+        background-color: #1f1f1f;
+        width: 2%;
+        height: 45%;
+        transform-origin: center 75%;
+        transform: translate(-50%, -75%);
+    }
+
+    .needle#minutes.moving {
+        transition: transform 150ms ease-out;
+    }
+
+    .needle#minutes:after {
+        content: '';
+        background-color: #1f1f1f;
+        width: 4vw;
+        height: 4vw;
+        max-width: 4vh;
+        max-height: 4vh;
+        display: block;
+        position: absolute;
+        top: 75%;
+        left: 50%;
+        box-sizing: border-box;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .needle#seconds {
+        background-color: #cb2f2f;
+        width: 1%;
+        height: 50%;
+        transform-origin: center 75%;
+        transform: translate(-50%, -75%);
+    }
+
+    .needle#seconds.moving {
+        transition: transform 150ms ease-out;
+    }
+
+    .needle#seconds:after {
+        content: '';
+        background-color: #cb2f2f;
+        width: 2.5vw;
+        height: 2.5vw;
+        max-width: 2.5vh;
+        max-height: 2.5vh;
+        display: block;
+        position: absolute;
+        top: 75%;
+        left: 50%;
+        box-sizing: border-box;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .clock_logo{
+        width: 10vw;
+        height: 10vw;
+        max-width: 10vh;
+        max-height: 10vh;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        box-sizing: border-box;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+    }
+    .clock_logo{
+            width: 10vw;
+            height: 10vw;
+            max-width: 10vh;
+            max-height: 10vh;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            box-sizing: border-box;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            background-image: var(--clock-logo);
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+    }
+    @media (min-width: 100vh) {
+        .clock {
+            border: solid 2.8vh var(--color-primary);
+            box-shadow: 0 1.4vh 2.8vh var(--color2);
+        }
+    }
+
+</style>
+
+
+
+
+
+            </div>
+        
+    
+</div>
+<style>
+    .nexmoe-pd {
+        left: auto;
+        top: 40px;
+        right: 0;
+    }
+    .nexmoe-pd-item{
+       display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    #nexmoe-pendant .mdui-drawer{
+        width: 305px;
+    }
+    @media screen and (max-width: 1600px) {
+        #nexmoe-pendant {
+            display: none
+        }
+    }
+</style>
+</div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div></div></body></html>
